@@ -373,11 +373,17 @@ static void PopulateOptionsWithDefault(STKAutoRecoveringHTTPDataSourceOptions* o
 
 -(void) dataSourceErrorOccured:(STKDataSource*)dataSource
 {
-    NSLog(@"dataSourceErrorOccured");
+    NSLog(@"dataSourceErrorOccured HTTP Error: %d", self.innerDataSource.httpStatusCode);
     
     if (self.innerDataSource.httpStatusCode == 416 /* Range out of bounds */)
     {
         [super dataSourceEof:dataSource];
+        
+    } else if (self.innerDataSource.httpStatusCode == 404 || self.innerDataSource.httpStatusCode == 0 || self.innerDataSource.httpStatusCode >= 500) {
+        
+        // 404 = Not Found. 0 = No Response Error with NSHTTPURLResponse. 500+ = Server error
+        [super dataSourceErrorOccured:dataSource];
+        
     }
     else
     {

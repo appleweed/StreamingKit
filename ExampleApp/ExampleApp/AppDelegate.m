@@ -70,7 +70,7 @@
 
 -(void) audioPlayerViewPlayFromIcecastSelected:(AudioPlayerView *)audioPlayerView
 {
-    NSURL* url = [NSURL URLWithString:@"http://nashe.streamr.ru/jazz-128.mp3"];
+    NSURL* url = [NSURL URLWithString:@"http://35.196.165.134:8000/stream"];
     
     STKDataSource* dataSource = [STKAudioPlayer dataSourceFromURL:url];
     

@@ -35,6 +35,8 @@
 #import "STKHTTPDataSource.h"
 #import "STKLocalFileDataSource.h"
 
+#define kAudioFileOGGType 1337
+
 @interface STKHTTPDataSource()
 {
 @private
@@ -133,6 +135,8 @@
             @"audio/wav": @(kAudioFileWAVEType),
             @"audio/x-wav": @(kAudioFileWAVEType),
             @"audio/vnd.wav": @(kAudioFileWAVEType),
+            @"audio/ogg": @(kAudioFileOGGType),   // we will convert ogg to wav
+            @"application/ogg": @(kAudioFileOGGType),   // we will convert ogg to wav
             @"audio/aifc": @(kAudioFileAIFCType),
             @"audio/aiff": @(kAudioFileAIFFType),
             @"audio/x-m4a": @(kAudioFileM4AType),
