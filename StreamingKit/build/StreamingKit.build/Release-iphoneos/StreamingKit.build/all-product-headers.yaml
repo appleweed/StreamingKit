@@ -1,0 +1,52 @@
+{
+  'version': 0,
+  'case-sensitive': 'false',
+  'roots': [
+    {
+      'type': 'directory',
+      'name': "/Users/omarabdelwahed/Documents/StreamingKit/StreamingKit/build/Release-iphoneos/StreamingKit",
+      'contents': [
+        {
+          'type': 'file',
+          'name': "STKAudioPlayer.h",
+          'external-contents': "/Users/omarabdelwahed/Documents/StreamingKit/StreamingKit/StreamingKit/STKAudioPlayer.h"
+        },
+        {
+          'type': 'file',
+          'name': "STKAutoRecoveringHTTPDataSource.h",
+          'external-contents': "/Users/omarabdelwahed/Documents/StreamingKit/StreamingKit/StreamingKit/STKAutoRecoveringHTTPDataSource.h"
+        },
+        {
+          'type': 'file',
+          'name': "STKCoreFoundationDataSource.h",
+          'external-contents': "/Users/omarabdelwahed/Documents/StreamingKit/StreamingKit/StreamingKit/STKCoreFoundationDataSource.h"
+        },
+        {
+          'type': 'file',
+          'name': "STKDataSource.h",
+          'external-contents': "/Users/omarabdelwahed/Documents/StreamingKit/StreamingKit/StreamingKit/STKDataSource.h"
+        },
+        {
+          'type': 'file',
+          'name': "STKDataSourceWrapper.h",
+          'external-contents': "/Users/omarabdelwahed/Documents/StreamingKit/StreamingKit/StreamingKit/STKDataSourceWrapper.h"
+        },
+        {
+          'type': 'file',
+          'name': "STKHTTPDataSource.h",
+          'external-contents': "/Users/omarabdelwahed/Documents/StreamingKit/StreamingKit/StreamingKit/STKHTTPDataSource.h"
+        },
+        {
+          'type': 'file',
+          'name': "STKLocalFileDataSource.h",
+          'external-contents': "/Users/omarabdelwahed/Documents/StreamingKit/StreamingKit/StreamingKit/STKLocalFileDataSource.h"
+        },
+        {
+          'type': 'file',
+          'name': "STKQueueEntry.h",
+          'external-contents': "/Users/omarabdelwahed/Documents/StreamingKit/StreamingKit/StreamingKit/STKQueueEntry.h"
+        }
+      ]
+    }
+  ]
+}

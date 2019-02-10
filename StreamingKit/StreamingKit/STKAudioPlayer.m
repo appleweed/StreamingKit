@@ -347,12 +347,12 @@ static void AudioFileStreamPacketsProc(void* clientData, UInt32 numberBytes, UIn
     {
         .mSampleRate = 44100.00,
         .mFormatID = kAudioFormatLinearPCM,
-        .mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagsNativeEndian | kAudioFormatFlagIsPacked,
+        .mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsPacked | kAudioFormatFlagIsNonInterleaved,
         .mFramesPerPacket = 1,
         .mChannelsPerFrame = 2,
-        .mBytesPerFrame = bytesPerSample * 2 /*channelsPerFrame*/,
-        .mBitsPerChannel = 8 * bytesPerSample,
-        .mBytesPerPacket = (bytesPerSample * 2)
+        .mBytesPerFrame = sizeof(float), //bytesPerSample * 2 /*channelsPerFrame*/,
+        .mBitsPerChannel = 8 * sizeof(float), //8 * bytesPerSample,
+        .mBytesPerPacket = sizeof(float) //(bytesPerSample * 2)
     };
     
 	outputUnitDescription = (AudioComponentDescription)
@@ -2618,28 +2618,35 @@ OSStatus AudioConverterCallback(AudioConverterRef inAudioConverter, UInt32* ioNu
             pthread_mutex_unlock(&playerMutex);
         }
         
-        AudioBuffer* localPcmAudioBuffer;
-        AudioBufferList localPcmBufferList;
+        //AudioBuffer* localPcmAudioBuffer;
+        //AudioBufferList localPcmBufferList;
+        AudioBufferList *localPcmBufferList = (AudioBufferList*)malloc(sizeof(AudioBufferList) + sizeof(AudioBuffer));
+        localPcmBufferList->mNumberBuffers = 2; //1;
         
-        localPcmBufferList.mNumberBuffers = 1;
-        localPcmAudioBuffer = &localPcmBufferList.mBuffers[0];
+        //localPcmBufferList.mNumberBuffers = 2;
+        //localPcmAudioBuffer = &localPcmBufferList.mBuffers[0];
         
         if (end >= start)
         {
             UInt32 framesAdded = 0;
             UInt32 framesToDecode = pcmBufferTotalFrameCount - end;
             
-            localPcmAudioBuffer->mData = pcmAudioBuffer->mData + (end * pcmBufferFrameSizeInBytes);
-            localPcmAudioBuffer->mDataByteSize = framesToDecode * pcmBufferFrameSizeInBytes;
-            localPcmAudioBuffer->mNumberChannels = pcmAudioBuffer->mNumberChannels;
+            //localPcmAudioBuffer->mData = pcmAudioBuffer->mData + (end * 4);//(end * pcmBufferFrameSizeInBytes);
+            //localPcmAudioBuffer->mDataByteSize = framesToDecode * 4;//pcmBufferFrameSizeInBytes;
+            //localPcmAudioBuffer->mNumberChannels = 1; //pcmAudioBuffer->mNumberChannels;
+            for ( int i=0; i<localPcmBufferList->mNumberBuffers; i++ ) {
+                localPcmBufferList->mBuffers[i].mNumberChannels = 1;
+                localPcmBufferList->mBuffers[i].mDataByteSize = framesToDecode * pcmBufferFrameSizeInBytes;
+                localPcmBufferList->mBuffers[i].mData = pcmAudioBuffer->mData + (end * pcmBufferFrameSizeInBytes);
+            }
             
-            status = AudioConverterFillComplexBuffer(audioConverterRef, AudioConverterCallback, (void*)&convertInfo, &framesToDecode, &localPcmBufferList, NULL);
+            status = AudioConverterFillComplexBuffer(audioConverterRef, AudioConverterCallback, (void*)&convertInfo, &framesToDecode, localPcmBufferList, NULL);
             
             framesAdded = framesToDecode;
             
             if ((status == 100 || status == 0) && recordAudioFileId && recordAudioConverterRef)
             {
-                [self handleRecordingOfAudioPackets:framesToDecode audioBuffer:&localPcmBufferList.mBuffers[0]];
+                [self handleRecordingOfAudioPackets:framesToDecode audioBuffer:&localPcmBufferList->mBuffers[0]];
             }
 
             if (status == 100)
@@ -2676,17 +2683,22 @@ OSStatus AudioConverterCallback(AudioConverterRef inAudioConverter, UInt32* ioNu
                 continue;
             }
             
-            localPcmAudioBuffer->mData = pcmAudioBuffer->mData;
-            localPcmAudioBuffer->mDataByteSize = framesToDecode * pcmBufferFrameSizeInBytes;
-            localPcmAudioBuffer->mNumberChannels = pcmAudioBuffer->mNumberChannels;
+            //localPcmAudioBuffer->mData = pcmAudioBuffer->mData;
+            //localPcmAudioBuffer->mDataByteSize = framesToDecode * pcmBufferFrameSizeInBytes;
+            //localPcmAudioBuffer->mNumberChannels = pcmAudioBuffer->mNumberChannels;
+            for ( int i=0; i<localPcmBufferList->mNumberBuffers; i++ ) {
+                localPcmBufferList->mBuffers[i].mData = pcmAudioBuffer->mData;
+                localPcmBufferList->mBuffers[i].mDataByteSize = framesToDecode * pcmBufferFrameSizeInBytes;
+                localPcmBufferList->mBuffers[i].mNumberChannels = pcmAudioBuffer->mNumberChannels;
+            }
             
-            status = AudioConverterFillComplexBuffer(audioConverterRef, AudioConverterCallback, (void*)&convertInfo, &framesToDecode, &localPcmBufferList, NULL);
+            status = AudioConverterFillComplexBuffer(audioConverterRef, AudioConverterCallback, (void*)&convertInfo, &framesToDecode, localPcmBufferList, NULL);
             
             framesAdded += framesToDecode;
             
             if ((status == 100 || status == 0) && recordAudioFileId && recordAudioConverterRef)
             {
-                [self handleRecordingOfAudioPackets:framesToDecode audioBuffer:&localPcmBufferList.mBuffers[0]];
+                [self handleRecordingOfAudioPackets:framesToDecode audioBuffer:&localPcmBufferList->mBuffers[0]];
             }
             
             if (status == 100)
@@ -2725,17 +2737,22 @@ OSStatus AudioConverterCallback(AudioConverterRef inAudioConverter, UInt32* ioNu
             UInt32 framesAdded = 0;
             UInt32 framesToDecode = start - end;
             
-            localPcmAudioBuffer->mData = pcmAudioBuffer->mData + (end * pcmBufferFrameSizeInBytes);
-            localPcmAudioBuffer->mDataByteSize = framesToDecode * pcmBufferFrameSizeInBytes;
-            localPcmAudioBuffer->mNumberChannels = pcmAudioBuffer->mNumberChannels;
+            //localPcmAudioBuffer->mData = pcmAudioBuffer->mData + (end * pcmBufferFrameSizeInBytes);
+            //localPcmAudioBuffer->mDataByteSize = framesToDecode * pcmBufferFrameSizeInBytes;
+            //localPcmAudioBuffer->mNumberChannels = pcmAudioBuffer->mNumberChannels;
+            for ( int i=0; i<localPcmBufferList->mNumberBuffers; i++ ) {
+                localPcmBufferList->mBuffers[i].mData = pcmAudioBuffer->mData + (end * pcmBufferFrameSizeInBytes);
+                localPcmBufferList->mBuffers[i].mDataByteSize = framesToDecode * pcmBufferFrameSizeInBytes;
+                localPcmBufferList->mBuffers[i].mNumberChannels = pcmAudioBuffer->mNumberChannels;
+            }
             
-            status = AudioConverterFillComplexBuffer(audioConverterRef, AudioConverterCallback, (void*)&convertInfo, &framesToDecode, &localPcmBufferList, NULL);
+            status = AudioConverterFillComplexBuffer(audioConverterRef, AudioConverterCallback, (void*)&convertInfo, &framesToDecode, localPcmBufferList, NULL);
             
             framesAdded = framesToDecode;
             
             if ((status == 100 || status == 0) && recordAudioFileId && recordAudioConverterRef)
             {
-                [self handleRecordingOfAudioPackets:framesToDecode audioBuffer:&localPcmBufferList.mBuffers[0]];
+                [self handleRecordingOfAudioPackets:framesToDecode audioBuffer:&localPcmBufferList->mBuffers[0]];
             }
             
             if (status == 100)
